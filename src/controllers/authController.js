@@ -14,6 +14,8 @@ const registerUser = async (req, res) => {
   
       // Create a new user
       const newUser = new User({
+        email,
+        fullname,
         username,
         password, // Store the password as plain text
       });
