@@ -47,8 +47,8 @@ app.delete('/menu/:id', deleteMenu);
 
 
 // User registration route
-app.post('/register', registerUser);
+app.post('/regis', registerUser);
 
 // User login route
-app.post('/login', login);
+app.post('/log', login);
 
