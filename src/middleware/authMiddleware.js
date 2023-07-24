@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 exports.authenticateToken = (req, res, next) => {
     try {
         const token = req.headers.authorization.split(' ')[1]; // Extract token from the Authorization header
-        const decoded = jwt.verify(token, 'Hakuna Matata'); // Verify the token using the secret key
+        const decoded = jwt.verify(token, 'helnnn'); // Verify the token using the secret key
 
         // Attach the decoded token to the request object
         req.user = decoded.user;

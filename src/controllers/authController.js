@@ -1,65 +1,74 @@
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const UserModel = require('../models/userModel');
+const User = require('../models/userModel');
 
-// User registration
-exports.registerUser = async (req, res) => {
-    const { username, password, email, fullname } = req.body;
-
+// Register a new user
+const registerUser = async (req, res) => {
     try {
-        // Check if the user already exists
-        const existingUser = await UserModel.findOne({ username });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Username Telah digunakan' });
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create the user
-        const newUser = new UserModel({
-            fullname,
-            email,
-            username,
-            password: hashedPassword,
-        });
-        await newUser.save();
-
-        res.status(201).json({ message: 'Registrasi Berhasil' });
+        const { username, password, email, fullname } = req.body;
+  
+      // Check if username already exists
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+        return res.status(400).json({ error: 'Username already exists' });
+      }
+  
+      // Create a new user
+      const newUser = new User({
+        username,
+        password, // Store the password as plain text
+      });
+  
+      // Save the user to the database
+      await newUser.save();
+  
+      res.json({ message: 'User registered successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Registrasi Gagal' });
+      console.error(error);
+      res.status(500).json({ error: 'Server error' });
     }
-};
+  };
+  
 
 // User login
-exports.loginUser = async (req, res) => {
-    const { username, password } = req.body;
-
+// Login logic
+const login = async (req, res) => {
     try {
-        // Check if the user exists
-        const user = await UserModel.findOne({ username });
-        if (!user) {
-            return res.status(400).json({ message: 'User Tidak Ditemukan' });
-        }
-
-        // Compare the password
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ message: 'Password Salah' });
-        }
-
-        // Generate JWT token
-        const token = jwt.sign({ Id: user._id, username: user.username }, "Hakuna Matata", {
-            expiresIn: '3h', // Set token expiration time
-        });
-
-        res.json({ token });
+      const { username, password } = req.body;
+  
+      // Check if user exists
+      const user = await User.findOne({ username });
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+  
+      // Check password
+      if (user.password !== password) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+  
+      // Generate JWT token
+      const token = jwt.sign({ user: user.username }, 'helnnn', { expiresIn: '1h' });
+  
+      // Set the JWT token as a cookie
+      res.cookie('token', token, { maxAge: 3600000, httpOnly: true }); // Expiry set to 1 hour (3600000 milliseconds)
+  
+      // Return the token as a response
+      res.json({ token });
     } catch (error) {
-        res.status(500).json({ message: 'Error logging in' });
+      console.error(error);
+      res.status(500).json({ error: 'Server error' });
     }
-};
+  };
 
 // Token verification
 exports.checkTokenValidity = (req, res) => {
     res.json({ valid: true });
 };
+
+
+module.exports = {
+    registerUser,
+    login,
+  };
+
+

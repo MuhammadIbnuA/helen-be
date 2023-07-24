@@ -6,7 +6,7 @@ const { loggerMiddleware } = require('./src/middleware/middleware');
 const { authenticateToken } = require('./src/middleware/authMiddleware');
 const { 
   registerUser, 
-  loginUser,
+  login,
 } = require('./src/controllers/authController');
 const { 
   postMenu,
@@ -50,5 +50,5 @@ app.delete('/menu/:id', deleteMenu);
 app.post('/register', registerUser);
 
 // User login route
-app.post('/login', loginUser);
+app.post('/login', login);
 
